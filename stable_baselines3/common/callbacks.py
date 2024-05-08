@@ -260,21 +260,18 @@ class CheckpointCallback(BaseCallback):
     :param verbose: Verbosity level: 0 for no output, 2 for indicating when saving model checkpoint
     """
 
-    def __init__(
-        self,
-        save_freq: int,
-        save_path: str,
-        name_prefix: str = "rl_model",
-        save_replay_buffer: bool = False,
-        save_vecnormalize: bool = False,
-        verbose: int = 0,
-    ):
         super().__init__(verbose)
         self.save_freq = save_freq
         self.save_path = save_path
         self.name_prefix = name_prefix
         self.save_replay_buffer = save_replay_buffer
         self.save_vecnormalize = save_vecnormalize
+        self.last_model_path = None
+        if self.save_replay_buffer:
+            self.last_replay_buffer_path = None
+        if self.save_vecnormalize:
+            self.last_vec_normalize_path = None
+
 
     def _init_callback(self) -> None:
         # Create folder if needed
@@ -298,6 +295,9 @@ class CheckpointCallback(BaseCallback):
             self.model.save(model_path)
             if self.verbose >= 2:
                 print(f"Saving model checkpoint to {model_path}")
+            if self.last_model_path is not None:
+                os.remove(self.last_model_path)
+            self.last_model_path = model_path
 
             if self.save_replay_buffer and hasattr(self.model, "replay_buffer") and self.model.replay_buffer is not None:
                 # If model has a replay buffer, save it too
@@ -305,6 +305,9 @@ class CheckpointCallback(BaseCallback):
                 self.model.save_replay_buffer(replay_buffer_path)  # type: ignore[attr-defined]
                 if self.verbose > 1:
                     print(f"Saving model replay buffer checkpoint to {replay_buffer_path}")
+                if self.last_replay_buffer_path is not None:
+                    os.remove(self.last_replay_buffer_path)
+                self.last_replay_buffer_path = replay_buffer_path
 
             if self.save_vecnormalize and self.model.get_vec_normalize_env() is not None:
                 # Save the VecNormalize statistics
@@ -312,6 +315,9 @@ class CheckpointCallback(BaseCallback):
                 self.model.get_vec_normalize_env().save(vec_normalize_path)  # type: ignore[union-attr]
                 if self.verbose >= 2:
                     print(f"Saving model VecNormalize to {vec_normalize_path}")
+                if self.last_vec_normalize_path is not None:
+                    os.remove(self.last_vec_normalize_path)
+                self.last_vec_normalize_path = vec_normalize_path
 
         return True
 
