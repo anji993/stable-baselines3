@@ -260,7 +260,7 @@ class CheckpointCallback(BaseCallback):
     :param verbose: Verbosity level: 0 for no output, 2 for indicating when saving model checkpoint
     """
 
-        super().__init__(verbose)
+    super().__init__(verbose)
         self.save_freq = save_freq
         self.save_path = save_path
         self.name_prefix = name_prefix
