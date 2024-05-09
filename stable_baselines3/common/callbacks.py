@@ -260,7 +260,16 @@ class CheckpointCallback(BaseCallback):
     :param verbose: Verbosity level: 0 for no output, 2 for indicating when saving model checkpoint
     """
 
-    super().__init__(verbose)
+    def __init__(
+        self,
+        save_freq: int,
+        save_path: str,
+        name_prefix: str = "rl_model",
+        save_replay_buffer: bool = False,
+        save_vecnormalize: bool = False,
+        verbose: int = 0,
+    ):
+        super().__init__(verbose)
         self.save_freq = save_freq
         self.save_path = save_path
         self.name_prefix = name_prefix
